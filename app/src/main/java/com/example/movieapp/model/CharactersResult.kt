@@ -1,4 +1,4 @@
-package com.example.movieapp
+package com.example.movieapp.model
 
 data class CharactersResult(
     val results: List<Character>
