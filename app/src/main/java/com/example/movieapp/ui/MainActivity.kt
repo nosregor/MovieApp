@@ -47,6 +47,12 @@ class MainActivity : ComponentActivity() {
                     Scaffold(
                         topBar = { TopAppBar(title = { Text(text = "Rick and Morty") }) }
                     ) { innerPadding ->
+                        if (state.error != null) {
+                            Box(modifier = Modifier.fillMaxSize()) {
+                                Text(state.error ?: "Network error", modifier = Modifier.align(Alignment.Center))
+                            }
+                        }
+
                         if (state.isLoading) {
                             Box(modifier = Modifier.fillMaxSize()) {
                                 CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
@@ -94,10 +100,10 @@ class MainActivity : ComponentActivity() {
         println("onStop()")
     }
 
-//    override fun onDestroy() {
-//        super.onDestroy()
-//        println(onDestroy())
-//    }
+    override fun onDestroy() {
+        super.onDestroy()
+        println(onDestroy())
+    }
 }
 
 // TODO: delete

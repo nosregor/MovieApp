@@ -1,5 +1,6 @@
 package com.example.movieapp.ui
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.movieapp.model.Character
@@ -17,6 +18,7 @@ class MainViewModel : ViewModel() {
     val state: StateFlow<UiState> = _state
 
 
+
     init {
         viewModelScope.launch {
             // change state var and set initial values followed by a 2 sec delay
@@ -25,34 +27,29 @@ class MainViewModel : ViewModel() {
 
             // retrofit instance
             val retofit = Retrofit.Builder()
-                .baseUrl("https://rickandmortyapi.com/api/")
+                .baseUrl("https://rickandmortyapix.com/api/")
                 .addConverterFactory(GsonConverterFactory.create())
                 .build()
 
             val apiClient = retofit.create(CharactersService::class.java)
-            println(apiClient)
-            println("Andrew")
 
-            //calling API
             try {
-                throw Exception("Hi There!")
-
+                // calling the API
                 val characters = apiClient.getCharacters()
-                    .results
 
-                val filteredCharacters = characters.filter { it.name.contains("Smith") }
+                // check if the network call is successful
+                if (characters.isSuccessful) {
+                    val filteredCharacters = characters.body()?.results?.filter  { it.name.contains("Smith") } ?: emptyList()
 
-                _state.value = UiState( isLoading = false,
-                    characters = filteredCharacters, null)
+                    _state.value = UiState( isLoading = false,
+                        characters = filteredCharacters, null)
+                } else {
+                   throw Exception("Something is wrong with the call")
+                }
+
             } catch (e: Exception) {
                 println(e)
-
-                // 1. filter out the exception
-                // catch app crash
-//                when(e){
-//                    is ConnectException -> //TODO: handle connection error
-//                    is UnknownHostException ->  //TODO: handle no internet connection error
-//                }
+                Log.e("ANDREW", e.javaClass.name)
 
                 _state.value = UiState( isLoading = false,
                     characters = emptyList(), e.message)
@@ -78,5 +75,7 @@ class MainViewModel : ViewModel() {
         val characters: List<Character> = emptyList(),
         val error: String?
     )
+
+
 
 }
