@@ -47,30 +47,32 @@ class MainActivity : ComponentActivity() {
                     Scaffold(
                         topBar = { TopAppBar(title = { Text(text = "Rick and Morty") }) }
                     ) { innerPadding ->
-                        if (state.error != null) {
-                            Box(modifier = Modifier.fillMaxSize()) {
-                                Text(state.error ?: "Network error", modifier = Modifier.align(Alignment.Center))
+                        when (state) {
+                            MainViewModel.UiState.Loading -> {
+                                Box(modifier = Modifier.fillMaxSize()) {
+                                    CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                                }
                             }
-                        }
-
-                        if (state.isLoading) {
-                            Box(modifier = Modifier.fillMaxSize()) {
-                                CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                            is MainViewModel.UiState.Success -> {
+                                LazyVerticalGrid(
+                                    columns = GridCells.Adaptive(180.dp),
+                                    modifier = Modifier.padding(innerPadding)
+                                ) {
+                                    items((state as MainViewModel.UiState.Success).data) { character ->
+                                        Text(
+                                            text = character.name,
+                                            color = if(character.favorite) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onBackground,
+                                            modifier = Modifier
+                                                .padding(vertical = 8.dp)
+                                                .clickable {
+                                                    viewModel.onCharacterClicked(character)
+                                                })
+                                    }
+                                }
                             }
-                        } else {
-                            LazyVerticalGrid(
-                                columns = GridCells.Adaptive(180.dp),
-                                modifier = Modifier.padding(innerPadding)
-                            ) {
-                                items(state.characters) { character ->
-                                    Text(
-                                        text = character.name,
-                                        color = if(character.favorite) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onBackground,
-                                        modifier = Modifier
-                                            .padding(vertical = 8.dp)
-                                            .clickable {
-                                                viewModel.onCharacterClicked(character)
-                                            })
+                            is MainViewModel.UiState.Error -> {
+                                Box(modifier = Modifier.fillMaxSize()) {
+                                    Text((state as MainViewModel.UiState.Error).message ?: "Network error", modifier = Modifier.align(Alignment.Center))
                                 }
                             }
                         }

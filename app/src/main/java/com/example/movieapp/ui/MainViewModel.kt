@@ -14,24 +14,22 @@ import retrofit2.converter.gson.GsonConverterFactory
 
 class MainViewModel : ViewModel() {
 
-    private val _state: MutableStateFlow<UiState> = MutableStateFlow(UiState(error = null))
+    private val _state: MutableStateFlow<UiState> = MutableStateFlow(UiState.Loading)
     val state: StateFlow<UiState> = _state
-
 
 
     init {
         viewModelScope.launch {
             // change state var and set initial values followed by a 2 sec delay
-            _state.value = UiState(isLoading = true, characters = emptyList(), null)
             delay(2000)
 
             // retrofit instance
-            val retofit = Retrofit.Builder()
-                .baseUrl("https://rickandmortyapix.com/api/")
+            val retrofit = Retrofit.Builder()
+                .baseUrl("https://rickandmortyapi.com/api/")
                 .addConverterFactory(GsonConverterFactory.create())
                 .build()
 
-            val apiClient = retofit.create(CharactersService::class.java)
+            val apiClient = retrofit.create(CharactersService::class.java)
 
             try {
                 // calling the API
@@ -39,43 +37,51 @@ class MainViewModel : ViewModel() {
 
                 // check if the network call is successful
                 if (characters.isSuccessful) {
-                    val filteredCharacters = characters.body()?.results?.filter  { it.name.contains("Smith") } ?: emptyList()
+                    val filteredCharacters =
+                        characters.body()?.results?.filter { it.name.contains("Smith") }
+                            ?: emptyList()
 
-                    _state.value = UiState( isLoading = false,
-                        characters = filteredCharacters, null)
+                    _state.value = UiState.Success(data = filteredCharacters)
                 } else {
-                   throw Exception("Something is wrong with the call")
+                    throw UnsupportedOperationException() //Exception("Something is wrong with the call")
                 }
 
             } catch (e: Exception) {
                 println(e)
                 Log.e("ANDREW", e.javaClass.name)
 
-                _state.value = UiState( isLoading = false,
-                    characters = emptyList(), e.message)
+                when (e) {
+                    is UnsupportedOperationException -> _state.value =
+                        UiState.Error("Problem with the server 500")
+
+                    else -> _state.value = UiState.Error("Problem with the request 400")
+                }
             }
 
         }
     }
 
     fun onCharacterClicked(character: Character) {
-        _state.value = _state.value.copy(
-            characters = _state.value.characters.map {
+        // update the character list
+        if (_state.value is UiState.Success) {
+            val oldCharacters = state.value as UiState.Success
+            val newCharacters = oldCharacters.data.map {
                 if (it.name == character.name) {
                     it.copy(favorite = !it.favorite)
                 } else {
                     it
                 }
             }
-        )
+
+            // update the private stated with updated character list
+            _state.value = UiState.Success(newCharacters)
+        }
     }
 
-    data class UiState(
-        val isLoading: Boolean = false,
-        val characters: List<Character> = emptyList(),
-        val error: String?
-    )
-
-
+    sealed class UiState {
+        object Loading : UiState()
+        data class Success(val data: List<Character>) : UiState()
+        data class Error(val message: String) : UiState()
+    }
 
 }
