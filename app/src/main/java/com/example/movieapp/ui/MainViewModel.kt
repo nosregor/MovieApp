@@ -4,43 +4,32 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.movieapp.model.Character
-import com.example.movieapp.network.CharactersService
+import com.example.movieapp.model.CharactersRepository
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 
-class MainViewModel : ViewModel() {
+class MainViewModel(charactersRepository: CharactersRepository) : ViewModel() {
 
     private val _state: MutableStateFlow<UiState> = MutableStateFlow(UiState.Loading)
     val state: StateFlow<UiState> = _state
 
 
     init {
+
         viewModelScope.launch {
             // change state var and set initial values followed by a 2 sec delay
             delay(2000)
 
-            // retrofit instance
-            val retrofit = Retrofit.Builder()
-                .baseUrl("https://rickandmortyapi.com/api/")
-                .addConverterFactory(GsonConverterFactory.create())
-                .build()
-
-            val apiClient = retrofit.create(CharactersService::class.java)
-
             try {
                 // calling the API
-                val characters = apiClient.getCharacters()
+                val characters = charactersRepository.getAll()
 
                 // check if the network call is successful
-                if (characters.isSuccessful) {
+                if (characters.isNotEmpty()) {
                     val filteredCharacters =
-                        characters.body()?.results?.filter { it.name.contains("Smith") }
-                            ?: emptyList()
-
+                        characters.filter { it.name.contains("Smith") }
                     _state.value = UiState.Success(data = filteredCharacters)
                 } else {
                     throw UnsupportedOperationException() //Exception("Something is wrong with the call")

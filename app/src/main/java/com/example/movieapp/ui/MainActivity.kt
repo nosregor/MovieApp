@@ -4,6 +4,8 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import com.example.movieapp.model.CharactersRepository
+import com.example.movieapp.model.datasources.ApiDataSource
 import com.example.movieapp.ui.screens.Home
 
 class MainActivity : ComponentActivity() {
@@ -12,8 +14,10 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         println("onCreate()")
 
+        val repository = CharactersRepository(ApiDataSource())
+
         setContent {
-            Home()
+            Home(repository)
         }
     }
 
