@@ -4,33 +4,27 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.movieapp.model.Character
-import com.example.movieapp.model.CharactersRepository
+import com.example.movieapp.usecases.FilterCharactersByLastNameUseCase
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-class MainViewModel(charactersRepository: CharactersRepository) : ViewModel() {
+class MainViewModel(private val filterCharactersUseCase: FilterCharactersByLastNameUseCase) : ViewModel() {
 
-    private val _state: MutableStateFlow<UiState> = MutableStateFlow(UiState.Loading)
+    private val _state: MutableStateFlow<UiState> = MutableStateFlow(UiState.Initial)
     val state: StateFlow<UiState> = _state
 
-
-    init {
-
+    fun onButtonClicked() {
         viewModelScope.launch {
             // change state var and set initial values followed by a 2 sec delay
             delay(2000)
 
             try {
-                // calling the API
-                val characters = charactersRepository.getAll()
-
+                val characters = filterCharactersUseCase("Smith")
                 // check if the network call is successful
                 if (characters.isNotEmpty()) {
-                    val filteredCharacters =
-                        characters.filter { it.name.contains("Smith") }
-                    _state.value = UiState.Success(data = filteredCharacters)
+                    _state.value = UiState.Success(data = characters)
                 } else {
                     throw UnsupportedOperationException() //Exception("Something is wrong with the call")
                 }
@@ -68,6 +62,7 @@ class MainViewModel(charactersRepository: CharactersRepository) : ViewModel() {
     }
 
     sealed class UiState {
+        object Initial : UiState()
         object Loading : UiState()
         data class Success(val data: List<Character>) : UiState()
         data class Error(val message: String) : UiState()
