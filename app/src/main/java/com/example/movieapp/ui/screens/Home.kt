@@ -66,9 +66,14 @@ fun Home(filterUseCase: FilterCharactersByLastNameUseCase) {
 
 @Preview
 @Composable
-fun ButtonForCharacters(fetchCharacters: () -> Unit = {}, modifier: Modifier = Modifier) {
-    Box(modifier = Modifier.fillMaxSize()) {
-        Button(onClick = fetchCharacters) {
+fun ButtonForCharacters(fetchCharacters: () -> Unit = {}) {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        Button(
+            onClick = fetchCharacters
+        ) {
             Text("Fetch", fontSize = 24.sp)
         }
     }

@@ -16,6 +16,9 @@ class MainViewModel(private val filterCharactersUseCase: FilterCharactersByLastN
     val state: StateFlow<UiState> = _state
 
     fun onButtonClicked() {
+        // Start loading
+        _state.value = UiState.Loading
+
         viewModelScope.launch {
             // change state var and set initial values followed by a 2 sec delay
             delay(2000)
@@ -31,7 +34,7 @@ class MainViewModel(private val filterCharactersUseCase: FilterCharactersByLastN
 
             } catch (e: Exception) {
                 println(e)
-                Log.e("ANDREW", e.javaClass.name)
+                Log.e("Exception name: ", e.javaClass.name)
 
                 when (e) {
                     is UnsupportedOperationException -> _state.value =
