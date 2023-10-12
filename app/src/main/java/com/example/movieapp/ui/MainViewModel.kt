@@ -4,18 +4,20 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.movieapp.model.Character
-import com.example.movieapp.usecases.FilterCharactersByLastNameUseCase
+import com.example.movieapp.model.CharactersRepository
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-class MainViewModel(private val filterCharactersUseCase: FilterCharactersByLastNameUseCase) : ViewModel() {
+//class MainViewModel(private val filterCharactersUseCase: FilterCharactersByLastNameUseCase) :
+class MainViewModel(charactersRepository: CharactersRepository) :
+    ViewModel() {
 
     private val _state: MutableStateFlow<UiState> = MutableStateFlow(UiState.Initial)
     val state: StateFlow<UiState> = _state
 
-    fun onButtonClicked() {
+    fun onButtonClicked(charactersRepository: CharactersRepository) {
         // Start loading
         _state.value = UiState.Loading
 
@@ -24,7 +26,9 @@ class MainViewModel(private val filterCharactersUseCase: FilterCharactersByLastN
             delay(2000)
 
             try {
-                val characters = filterCharactersUseCase("Smith")
+//                val characters = filterCharactersUseCase("Smith")
+                val characters = charactersRepository.getAll()
+                println(characters)
                 // check if the network call is successful
                 if (characters.isNotEmpty()) {
                     _state.value = UiState.Success(data = characters)

@@ -22,19 +22,21 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.movieapp.model.CharactersRepository
 import com.example.movieapp.ui.MainViewModel
 import com.example.movieapp.ui.theme.MovieAppTheme
-import com.example.movieapp.usecases.FilterCharactersByLastNameUseCase
 
+//fun Home(filterUseCase: FilterCharactersByLastNameUseCase) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Home(filterUseCase: FilterCharactersByLastNameUseCase) {
+fun Home(repository: CharactersRepository) {
     val viewModel: MainViewModel =
-        viewModel { MainViewModel(filterCharactersUseCase = filterUseCase) }
+        viewModel { MainViewModel(charactersRepository = repository) }
     val state by viewModel.state.collectAsState()
 
     MovieAppTheme {
@@ -43,13 +45,19 @@ fun Home(filterUseCase: FilterCharactersByLastNameUseCase) {
             modifier = Modifier
                 .fillMaxSize()
                 .wrapContentSize(Alignment.Center),
-            color = MaterialTheme.colorScheme.background
+            color = Color.Blue
+//            color = MaterialTheme.colorScheme.background
         ) {
             Scaffold(
-                topBar = { TopAppBar(title = { Text(text = "Rick and Morty") }) }
+                topBar = { TopAppBar(title = { Text(text = "Rick and Morty Characters") }) }
             ) { innerPadding ->
                 when (state) {
-                    is MainViewModel.UiState.Initial -> ButtonForCharacters(fetchCharacters = { viewModel.onButtonClicked() })
+                    is MainViewModel.UiState.Initial -> ButtonForCharacters(fetchCharacters = {
+                        viewModel.onButtonClicked(
+                            repository
+                        )
+                    })
+
                     is MainViewModel.UiState.Loading -> Loading()
                     is MainViewModel.UiState.Success -> Success(
                         viewModel = viewModel,
@@ -81,6 +89,7 @@ fun ButtonForCharacters(fetchCharacters: () -> Unit = {}) {
 
 @Composable
 private fun Loading() {
+    println("Loading()")
     Box(modifier = Modifier.fillMaxSize()) {
         CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
     }
