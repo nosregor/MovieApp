@@ -52,6 +52,7 @@ fun Characters(repository: CharactersRepository, navController: NavController) {
                     val characterId =
                         (events as MainViewModel.UiEvent.CharacterSelected).characterId
                     navController.navigate("characters/$characterId")
+                    println("characterId: $characterId")
                 }
 
                 None -> {

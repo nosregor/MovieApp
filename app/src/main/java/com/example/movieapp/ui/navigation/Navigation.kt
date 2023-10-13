@@ -23,9 +23,11 @@ fun Navigation() {
         composable(
             route = Screen.CharacterDetail.route,
         ) { backStackEntry ->
+            val convertCharacterIdToString = backStackEntry.arguments?.getString("characterId")
+            println("backStackEntry.arguments: $convertCharacterIdToString")
             CharacterDetail(
                 repository = repository,
-                characterId = backStackEntry.arguments?.getInt("characterId"),
+                characterId = convertCharacterIdToString?.toInt(),
                 onBack = { navController.popBackStack() }
             )
         }
