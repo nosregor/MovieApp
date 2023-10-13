@@ -12,6 +12,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -21,7 +22,6 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.example.movieapp.model.CharactersRepository
 import com.example.movieapp.ui.MainViewModel
-import com.example.movieapp.ui.MainViewModel.UiEvent.None
 import com.example.movieapp.ui.composables.MyScaffold
 
 @Composable
@@ -32,7 +32,16 @@ fun Characters(repository: CharactersRepository, navController: NavController) {
 
     val state by viewModel.state.collectAsState()
 
-    val events by viewModel.events.collectAsState(initial = None)
+    LaunchedEffect(true) {
+        viewModel.events.collect { event ->
+            when (event) {
+                is MainViewModel.UiEvent.CharacterSelected -> {
+                    val characterId = event.characterId
+                    navController.navigate("characters/$characterId")
+                }
+            }
+        }
+    }
 
     MyScaffold(
         title = "Characters",
@@ -46,17 +55,6 @@ fun Characters(repository: CharactersRepository, navController: NavController) {
                 )
 
                 is MainViewModel.UiState.Error -> Error(state = state as MainViewModel.UiState.Error)
-            }
-            when (events) {
-                is MainViewModel.UiEvent.CharacterSelected -> {
-                    val characterId =
-                        (events as MainViewModel.UiEvent.CharacterSelected).characterId
-                    navController.navigate("characters/$characterId")
-                }
-
-                None -> {
-                    // do nothing
-                }
             }
         }
     )

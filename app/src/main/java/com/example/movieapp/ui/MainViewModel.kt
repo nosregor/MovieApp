@@ -66,7 +66,6 @@ class MainViewModel(charactersRepository: CharactersRepository) :
 
     sealed class UiEvent {
         data class CharacterSelected(val characterId: Int) : UiEvent()
-        object None : UiEvent()
     }
 
 }
