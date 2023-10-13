@@ -4,9 +4,7 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import com.example.movieapp.model.CharactersRepository
-import com.example.movieapp.model.datasources.ApiDataSource
-import com.example.movieapp.ui.screens.Home
+import com.example.movieapp.ui.navigation.Navigation
 
 class MainActivity : ComponentActivity() {
     @SuppressLint("ProduceStateDoesNotAssignValue")
@@ -14,11 +12,10 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         println("onCreate()")
 
-        val repository = CharactersRepository(ApiDataSource())
 //        val filterUseCase = FilterCharactersByLastNameUseCase(repository)
 
         setContent {
-            Home(repository)
+            Navigation()
         }
     }
 

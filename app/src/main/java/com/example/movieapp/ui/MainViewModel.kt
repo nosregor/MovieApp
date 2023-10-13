@@ -32,6 +32,7 @@ class MainViewModel(charactersRepository: CharactersRepository) :
                 // check if the network call is successful
                 if (characters.isNotEmpty()) {
                     _state.value = UiState.Success(data = characters)
+
                 } else {
                     throw UnsupportedOperationException() //Exception("Something is wrong with the call")
                 }
