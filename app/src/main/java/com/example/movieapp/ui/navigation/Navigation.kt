@@ -8,7 +8,6 @@ import com.example.movieapp.model.CharactersRepository
 import com.example.movieapp.model.datasources.ApiDataSource
 import com.example.movieapp.ui.screens.CharacterDetail
 import com.example.movieapp.ui.screens.Characters
-import com.example.movieapp.ui.screens.Home
 
 @Composable
 fun Navigation() {
@@ -17,15 +16,18 @@ fun Navigation() {
 
     val repository = CharactersRepository(ApiDataSource())
 
-    NavHost(navController = navController, startDestination = Screen.Home.route) {
-        composable(Screen.Home.route) {
-            Home(repository, navController)
-        }
+    NavHost(navController = navController, startDestination = Screen.Characters.route) {
         composable(Screen.Characters.route) {
-            Characters(repository = repository)
+            Characters(repository = repository, navController = navController)
         }
-        composable(Screen.CharacterDetail.route) { backStackEntry ->
-            CharacterDetail(repository = repository, characterId = backStackEntry.arguments?.getInt("characterId"))
+        composable(
+            route = Screen.CharacterDetail.route,
+        ) { backStackEntry ->
+            CharacterDetail(
+                repository = repository,
+                characterId = backStackEntry.arguments?.getInt("characterId"),
+                onBack = { navController.popBackStack() }
+            )
         }
     }
 }

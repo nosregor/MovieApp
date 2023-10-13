@@ -5,67 +5,61 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
 import com.example.movieapp.model.CharactersRepository
 import com.example.movieapp.ui.MainViewModel
-import com.example.movieapp.ui.theme.MovieAppTheme
+import com.example.movieapp.ui.MainViewModel.UiEvent.None
+import com.example.movieapp.ui.composables.MyScaffold
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Characters(repository: CharactersRepository) {
+fun Characters(repository: CharactersRepository, navController: NavController) {
+
     val viewModel: MainViewModel =
         viewModel { MainViewModel(charactersRepository = repository) }
+
     val state by viewModel.state.collectAsState()
 
-    MovieAppTheme {
-        // A surface container using the 'background' color from the theme
-        Surface(
-            modifier = Modifier
-                .fillMaxSize()
-                .wrapContentSize(Alignment.Center),
-            color = Color.Blue
-//            color = MaterialTheme.colorScheme.background
-        ) {
-            Scaffold(
-                topBar = { TopAppBar(title = { Text(text = "Characters") }) }
-            ) { innerPadding ->
-                when (state) {
-                    is MainViewModel.UiState.Initial -> ButtonForCharacters(fetchCharacters = {
-                        viewModel.onButtonClicked(
-                            repository
-                        )
-                    })
+    val events by viewModel.events.collectAsState(initial = None)
 
-                    is MainViewModel.UiState.Loading -> Loading()
-                    is MainViewModel.UiState.Success -> Success(
-                        viewModel = viewModel,
-                        innerPadding = innerPadding,
-                        state = state as MainViewModel.UiState.Success
-                    )
+    MyScaffold(
+        title = "Characters",
+        content = { innerPadding ->
+            when (state) {
+                is MainViewModel.UiState.Loading -> Loading()
+                is MainViewModel.UiState.Success -> Success(
+                    viewModel = viewModel,
+                    innerPadding = innerPadding,
+                    state = state as MainViewModel.UiState.Success
+                )
 
-                    is MainViewModel.UiState.Error -> Error(state = state as MainViewModel.UiState.Error)
+                is MainViewModel.UiState.Error -> Error(state = state as MainViewModel.UiState.Error)
+            }
+            when (events) {
+                is MainViewModel.UiEvent.CharacterSelected -> {
+                    val characterId =
+                        (events as MainViewModel.UiEvent.CharacterSelected).characterId
+                    navController.navigate("characters/$characterId")
+                }
+
+                None -> {
+                    // do nothing
                 }
             }
         }
-    }
+    )
 }
 
 @Composable
